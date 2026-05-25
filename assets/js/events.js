@@ -11,7 +11,7 @@ export const SUGGESTIONS = [
 
 function persist(data) { saveData(data) }
 
-export function createKeo({ title, datetime, location, creator, participants = [] }) {
+export function createKeo({ title, datetime, location, creator, participants = [], inviteOnly = false }) {
   const data = loadData()
   const keo = {
     id: generateId('k_'),
@@ -22,6 +22,8 @@ export function createKeo({ title, datetime, location, creator, participants = [
     participants: participants.filter(Boolean).map(s => s.trim()),
     votes: { bia: 0, nuong: 0, lau: 0 },
     voters: [],
+    inviteOnly: Boolean(inviteOnly),
+    inviteCode: inviteOnly ? generateId('inv_') : '',
     createdAt: new Date().toISOString()
   }
   data.keos = data.keos || []

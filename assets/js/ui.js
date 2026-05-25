@@ -13,6 +13,23 @@ export function showToast(msg, timeout = 2500) {
   t._h = setTimeout(() => t.classList.remove('show'), timeout)
 }
 
+export function updateInviteNote(inviteToken = '', hiddenCount = 0) {
+  const note = q('#invite-note')
+  if (!note) return
+  if (inviteToken) {
+    note.textContent = 'Bạn đang xem chế độ mời riêng. Những kèo invite phù hợp đã hiển thị.'
+    note.classList.add('active')
+    return
+  }
+  if (hiddenCount > 0) {
+    note.textContent = `Có ${hiddenCount} kèo riêng chỉ dành cho người có link mời. Nếu bạn có link, hãy mở trang với ?invite=CODE.`
+    note.classList.add('active')
+    return
+  }
+  note.textContent = ''
+  note.classList.remove('active')
+}
+
 export function openModal() {
   const m = q('#modal')
   m.setAttribute('aria-hidden', 'false')
@@ -32,6 +49,7 @@ function createVoteButton(type, label, count) {
 function createKeoCard(keo) {
   const card = el('div', { class: 'card', dataset: { id: keo.id } })
   const title = el('h3', {}, keo.title)
+  const badge = keo.inviteOnly ? el('div', { class: 'invite-badge' }, 'Link mời') : null
   const meta = el('div', { class: 'meta' }, `${formatDateTime(keo.datetime)} • ${keo.location || 'Chưa rõ'}`)
   const votes = el('div', { class: 'votes' })
   const bBtn = createVoteButton('bia', 'Bia 🍺', keo.votes?.bia)
@@ -46,10 +64,13 @@ function createKeoCard(keo) {
   inputName.style.flex = '1'
   const btnAddPart = el('button', { class: 'btn small' }, 'Thêm')
   const btnIcs = el('button', { class: 'btn small' }, 'Thêm vào lịch')
+  const btnShare = keo.inviteOnly ? el('button', { class: 'btn small ghost' }, 'Sao chép link mời') : null
   const btnDelete = el('button', { class: 'btn light' }, 'Xoá')
-  actions.append(inputName, btnAddPart, btnIcs, btnDelete)
+  if (btnShare) actions.append(inputName, btnAddPart, btnIcs, btnShare, btnDelete)
+  else actions.append(inputName, btnAddPart, btnIcs, btnDelete)
 
-  card.append(title, meta, votes, part, actions)
+  if (badge) card.append(title, badge, meta, votes, part, actions)
+  else card.append(title, meta, votes, part, actions)
 
   // listeners
   votes.addEventListener('click', (ev) => {
@@ -90,6 +111,26 @@ function createKeoCard(keo) {
     showToast('Đã thêm vào lịch!')
   })
 
+  if (keo.inviteOnly && btnShare) {
+    btnShare.addEventListener('click', async () => {
+      const invitation = new URL(window.location.href)
+      invitation.searchParams.set('invite', keo.inviteCode)
+      const link = invitation.toString()
+      try {
+        await navigator.clipboard.writeText(link)
+        showToast('Đã sao chép link mời!')
+      } catch (e) {
+        const temp = document.createElement('textarea')
+        temp.value = link
+        document.body.appendChild(temp)
+        temp.select()
+        document.execCommand('copy')
+        temp.remove()
+        showToast('Đã sao chép link mời!')
+      }
+    })
+  }
+
   btnDelete.addEventListener('click', () => {
     if (!confirm('Xác nhận xoá kèo này?')) return
     import('./events.js').then(mod => {
@@ -102,12 +143,15 @@ function createKeoCard(keo) {
   return card
 }
 
-export function renderKeoList(filter = 'all', search = '') {
+export function renderKeoList(filter = 'all', search = '', inviteToken = '') {
   const data = loadData()
   const list = data.keos || []
   const wrap = keoListEl()
   wrap.innerHTML = ''
+  const hiddenCount = list.filter(k => k.inviteOnly && k.inviteCode !== inviteToken).length
+  updateInviteNote(inviteToken, hiddenCount)
   const items = list.filter(k => {
+    if (k.inviteOnly && k.inviteCode !== inviteToken) return false
     const s = (k.title + ' ' + k.location).toLowerCase()
     if (search && !s.includes(search.toLowerCase())) return false
     if (filter === 'upcoming') return new Date(k.datetime) > new Date()

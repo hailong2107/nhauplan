@@ -1,7 +1,9 @@
-import { renderKeoList, openModal, closeModal, addKeoToList, showToast } from './ui.js'
+import { renderKeoList, openModal, closeModal, addKeoToList, showToast, updateInviteNote } from './ui.js'
 import * as Events from './events.js'
 import * as Storage from './storage.js'
 import { q, debounce } from './utils.js'
+const inviteToken = new URLSearchParams(window.location.search).get('invite') || ''
+
 function bind() {
   q('#open-create').addEventListener('click', () => {
     q('#form-create').reset()
@@ -28,7 +30,7 @@ function bind() {
     q('#input-datetime').focus()
   })
 
-  const doRender = () => renderKeoList(q('#filter').value, q('#search').value.trim())
+  const doRender = () => renderKeoList(q('#filter').value, q('#search').value.trim(), inviteToken)
   q('#filter').addEventListener('change', doRender)
   q('#clear-search').addEventListener('click', () => { q('#search').value=''; doRender() })
   q('#search').addEventListener('input', debounce(doRender, 180))
@@ -77,11 +79,12 @@ function handleCreateKeo() {
   const location = q('#input-location').value.trim()
   const creator = q('#input-creator').value.trim() || 'Ẩn danh'
   const participants = q('#input-participants').value.split('\n').map(s=>s.trim()).filter(Boolean)
+  const inviteOnly = q('#input-invite-only').checked
   if (!title) { showToast('Vui lòng nhập tiêu đề kèo'); q('#input-title').focus(); return }
   if (!datetime) { showToast('Vui lòng chọn thời gian'); q('#input-datetime').focus(); return }
   try {
     btn.disabled = true
-    const keo = Events.createKeo({ title, datetime, location, creator, participants })
+    const keo = Events.createKeo({ title, datetime, location, creator, participants, inviteOnly })
     addKeoToList(keo)
     closeModal()
     showToast('Kèo đã được tạo!')
@@ -98,8 +101,11 @@ function init() {
   const t = Storage.getTheme() || 'dark'
   applyTheme(t)
   bind()
-  // initial render using current controls
-  renderKeoList(q('#filter').value, q('#search').value.trim())
+  // initial render using current controls and invite token
+  const filter = q('#filter') ? q('#filter').value : 'all'
+  const search = q('#search') ? q('#search').value.trim() : ''
+  renderKeoList(filter, search, inviteToken)
+  updateInviteNote(inviteToken)
 }
 
 document.addEventListener('DOMContentLoaded', init)

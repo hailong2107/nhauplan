@@ -57,6 +57,7 @@
             </select>
             <button id="clear-search" class="btn light" aria-label="Xoá tìm kiếm">Xoá</button>
           </div>
+          <div id="invite-note" class="invite-note" aria-live="polite"></div>
         </section>
 
         <section class="list-section" aria-label="Danh sách kèo">
@@ -103,6 +104,11 @@
 
             <label for="input-participants">Danh sách tham gia (mỗi tên một dòng)</label>
             <textarea id="input-participants" class="input" rows="3" placeholder="Nhập tên anh em"></textarea>
+
+            <label class="checkbox-row">
+              <input id="input-invite-only" type="checkbox" />
+              <span>Chỉ những ai có link invite mới xem kèo này</span>
+            </label>
 
             <div class="form-actions">
               <button type="button" id="btn-add" class="btn primary">Tạo kèo</button>

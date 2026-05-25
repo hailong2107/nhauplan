@@ -59,6 +59,12 @@ body{margin:0;background:linear-gradient(180deg,#071018 0%, #081219 100%);font-f
 .form-actions{display:flex;gap:8px;margin-top:12px}
 .row{display:flex;gap:8px}
 .col{flex:1}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--text)}
+.checkbox-row input{width:16px;height:16px;flex-shrink:0}
+.invite-note{margin-top:10px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:var(--text);font-size:13px;display:none}
+.invite-note.active{display:block}
+.invite-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(255,183,3,0.12);color:#ffdd8a;font-size:12px;margin-bottom:10px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
 .micro{color:var(--muted);font-size:13px}
 
 @media(max-width:720px){

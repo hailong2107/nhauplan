@@ -45,6 +45,10 @@ Deploy lên GitHub Pages
 1. Push mã nguồn lên GitHub (branch `main` hoặc `gh-pages`).
 2. Cách nhanh (không cần build): vào trang repo → Settings → Pages → Source: `main` branch / root (`/`) → Save. Chờ vài phút, site sẽ có dạng `https://<username>.github.io/<repo>/`.
 
+Tự động deploy bằng GitHub Action
+- Nếu repo dùng branch `main`, action sẽ tự động chạy mỗi khi push lên `main`.
+- Action sẽ upload toàn bộ thư mục gốc lên Pages mà không cần bước build riêng.
+
 Nếu bạn muốn dùng `gh-pages` branch tự động:
 
 ```bash
@@ -54,3 +58,8 @@ npm install --save-dev gh-pages
 # "predeploy": "", "deploy": "gh-pages -d ."
 npm run deploy
 ```
+
+Invite link
+- Khi tạo kèo, đánh dấu checkbox "Chỉ những ai có link invite mới xem kèo này".
+- Sau khi tạo kèo, nếu kèo là invite-only, sẽ có nút "Sao chép link mời" trên thẻ kèo.
+- Người nhận link sẽ mở trang với tham số URL `?invite=...` để xem chế độ mời.
