@@ -1,0 +1,75 @@
+:root{
+  --bg:#0b0f12;
+  --panel:#0f1619;
+  --muted:#9aa4a6;
+  --accent:#ffb703;
+  --accent-2:#ff6b6b;
+  --glass: rgba(255,255,255,0.03);
+  --glass-2: rgba(255,255,255,0.02);
+  --radius:12px;
+  --card-pad:14px;
+  --text:#e6eef0;
+}
+*{box-sizing:border-box}
+html,body,#app{height:100%}
+body{margin:0;background:linear-gradient(180deg,#071018 0%, #081219 100%);font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:var(--text);-webkit-font-smoothing:antialiased}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.03);backdrop-filter: blur(6px)}
+.brand h1{margin:0;font-size:20px}
+.slogan{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.header-actions{display:flex;align-items:center;gap:16px}
+.leaderboard{display:flex;gap:12px;background:var(--glass);padding:8px;border-radius:10px}
+.lb-item{font-size:13px;color:var(--muted)}
+.controls{display:flex;gap:8px}
+.container{max-width:980px;margin:22px auto;padding:0 18px}
+.dashboard{display:flex;flex-direction:column;gap:18px;margin-bottom:12px}
+.stats{display:flex;gap:12px}
+.stat-card{background:var(--panel);padding:14px;border-radius:12px;flex:1;display:flex;flex-direction:column}
+.stat-number{font-size:20px;font-weight:700}
+.stat-label{font-size:12px;color:var(--muted)}
+.search-filter{display:flex;gap:8px;align-items:center}
+.input{background:var(--glass);border:1px solid rgba(255,255,255,0.03);color:var(--text);padding:10px;border-radius:10px;outline:none}
+.input:focus{box-shadow:0 6px 18px rgba(0,0,0,0.5)}
+.input.small{padding:8px;font-size:13px}
+.btn{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+.btn:hover{transform:translateY(-2px)}
+.btn.primary{background:linear-gradient(90deg,var(--accent),#ffa64d);border:none;color:#081219;font-weight:700}
+.btn.light{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+.btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.03)}
+.btn.small{padding:6px 8px;font-size:13px}
+.list-section{margin-top:8px}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.keo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:var(--card-pad);border-radius:12px;border:1px solid rgba(255,255,255,0.03);position:relative}
+.card h3{margin:0 0 8px;font-size:16px}
+.meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+.votes{display:flex;gap:8px;align-items:center}
+.vote-btn{display:inline-flex;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--glass-2);border:1px solid rgba(255,255,255,0.02);cursor:pointer}
+.vote-count{font-weight:700}
+.participants{margin-top:8px;font-size:13px;color:var(--muted)}
+.small-actions{display:flex;gap:8px;margin-top:10px}
+.empty{text-align:center;padding:40px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:12px}
+.emoji{font-size:38px}
+.toast{position:fixed;right:20px;bottom:20px;min-width:220px;padding:12px;border-radius:10px;background:rgba(0,0,0,0.6);color:#fff;display:flex;align-items:center;gap:10px;box-shadow:0 6px 22px rgba(0,0,0,0.6);opacity:0;transform:translateY(20px);transition:all .28s}
+.toast.show{opacity:1;transform:translateY(0)}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.4), rgba(0,0,0,0.6));z-index:60}
+.modal[aria-hidden="false"]{display:flex}
+.modal-panel{background:var(--panel);padding:18px;border-radius:14px;min-width:320px;max-width:720px;position:relative}
+.modal .close{position:absolute;right:12px;top:8px;background:transparent;border:none;color:var(--muted);font-size:18px}
+.form label{font-size:13px;color:var(--muted);display:block;margin-top:10px}
+.form-actions{display:flex;gap:8px;margin-top:12px}
+.row{display:flex;gap:8px}
+.col{flex:1}
+.micro{color:var(--muted);font-size:13px}
+
+@media(max-width:720px){
+  .keo-list{grid-template-columns:1fr}
+  .topbar{padding:14px}
+  .container{padding:0 12px}
+}
+
+/* subtle animations */
+.pulse{animation:pulse .9s ease}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+
+.light-mode{background:#f7f7f8;color:#111}
+.light-mode .card{background:#fff;border:1px solid rgba(0,0,0,0.06)}

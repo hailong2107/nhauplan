@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nhậu Planner — Lên kèo cùng anh em</title>
+    <meta name="description" content="Nhậu Planner — tạo kèo, mời bạn bè, vote kiểu nhậu và thêm vào lịch. 100% tĩnh, chạy trên GitHub Pages." />
+    <meta name="author" content="Nhậu Planner" />
+    <meta name="theme-color" content="#0c0d10" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Nhậu Planner — Lên kèo cùng anh em" />
+    <meta property="og:description" content="Tạo kèo nhanh, mời anh em, vote Bia/Nướng/Lẩu và thêm vào lịch. Không cần backend." />
+    <meta property="og:image" content="/assets/og-image.png" />
+    <link rel="canonical" href="https://your-username.github.io/nhauplan/" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.88em' font-size='78'%3E%F0%9F%8D%BA%3C/text%3E%3C/svg%3E">
+    <link rel="stylesheet" href="assets/css/styles.css">
+  </head>
+  <body>
+    <div id="app" class="app">
+      <header class="topbar" role="banner">
+        <div class="brand">
+          <h1 id="site-title">Nhậu Planner</h1>
+          <p class="slogan">Lên kèo cùng anh em — đơn giản, nhanh gọn 🍻</p>
+        </div>
+        <div class="header-actions" aria-hidden="false">
+          <div class="leaderboard" id="leaderboard" aria-label="Bảng xếp hạng"> 
+            <div class="lb-item">Người tạo: <strong id="leader-creator">—</strong></div>
+            <div class="lb-item">Người vote: <strong id="leader-voter">—</strong></div>
+          </div>
+          <div class="controls" role="toolbar" aria-label="Hành động">
+            <button id="toggle-theme" class="btn small" aria-pressed="false" aria-label="Chuyển đổi giao diện">Tối 🌙</button>
+            <button id="open-create" class="btn primary" aria-haspopup="dialog" aria-controls="modal">Tạo kèo nhậu</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="container" role="main">
+        <section class="dashboard" id="dashboard" aria-label="Bảng điều khiển">
+          <div class="stats" role="region" aria-label="Thống kê nhanh">
+            <div class="stat-card">
+              <div class="stat-number" id="total-keo">0</div>
+              <div class="stat-label">Tổng số kèo</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="total-votes">0</div>
+              <div class="stat-label">Tổng lượt vote</div>
+            </div>
+          </div>
+
+          <div class="search-filter" role="search" aria-label="Tìm kiếm kèo">
+            <input id="search" class="input" placeholder="Tìm kèo theo tên hoặc địa điểm" aria-label="Tìm kiếm kèo" />
+            <label for="filter" class="sr-only">Bộ lọc</label>
+            <select id="filter" class="input small" aria-label="Lọc kèo">
+              <option value="all">Tất cả</option>
+              <option value="upcoming">Sắp diễn ra</option>
+              <option value="past">Đã qua</option>
+            </select>
+            <button id="clear-search" class="btn light" aria-label="Xoá tìm kiếm">Xoá</button>
+          </div>
+        </section>
+
+        <section class="list-section" aria-label="Danh sách kèo">
+          <div class="list-header">
+            <h2>Kèo hiện có</h2>
+            <div class="list-actions">
+              <button id="suggest-keo" class="btn ghost" aria-label="Gợi ý kèo">Gợi ý kèo</button>
+            </div>
+          </div>
+
+          <div id="keo-list" class="keo-list" aria-live="polite" aria-atomic="true">
+            <div class="empty" id="empty-state" role="status" aria-live="polite">
+              <div class="emoji" aria-hidden="true">🍻</div>
+              <h3>Chưa có kèo nào, tạo kèo đầu tiên thôi 🍻</h3>
+              <p class="micro">Nhấn "Tạo kèo nhậu" để bắt đầu.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <div id="toast" class="toast" aria-live="polite" role="status"></div>
+
+      <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-panel">
+          <button id="modal-close" class="close" aria-label="Đóng">✕</button>
+          <h3 id="modal-title">Tạo kèo nhậu</h3>
+          <form id="form-create" class="form">
+            <label for="input-title">Tiêu đề kèo *</label>
+            <input id="input-title" class="input" placeholder="Tên kèo (ví dụ: Kèo chill cuối tuần)" required />
+
+            <div class="row">
+              <div class="col">
+                <label for="input-datetime">Thời gian *</label>
+                <input id="input-datetime" class="input" type="datetime-local" required />
+              </div>
+              <div class="col">
+                <label for="input-location">Địa điểm</label>
+                <input id="input-location" class="input" placeholder="Địa điểm (quán, nhà ai...)" />
+              </div>
+            </div>
+
+            <label for="input-creator">Tên người tạo</label>
+            <input id="input-creator" class="input" placeholder="Tên của bạn" />
+
+            <label for="input-participants">Danh sách tham gia (mỗi tên một dòng)</label>
+            <textarea id="input-participants" class="input" rows="3" placeholder="Nhập tên anh em"></textarea>
+
+            <div class="form-actions">
+              <button type="button" id="btn-add" class="btn primary">Tạo kèo</button>
+              <button type="button" id="btn-cancel" class="btn light">Huỷ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <noscript>
+      <div class="no-js">Ứng dụng cần JavaScript để hoạt động đầy đủ. Vui lòng bật JavaScript.</div>
+    </noscript>
+
+    <script type="module" src="assets/js/app.js" defer></script>
+  </body>
+</html>
+

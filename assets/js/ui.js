@@ -1,0 +1,180 @@
+import { q, qa, el, formatDateTime } from './utils.js'
+import * as Events from './events.js'
+import { loadData } from './storage.js'
+
+const toastEl = () => q('#toast')
+const keoListEl = () => q('#keo-list')
+
+export function showToast(msg, timeout = 2500) {
+  const t = toastEl()
+  t.textContent = msg
+  t.classList.add('show')
+  clearTimeout(t._h)
+  t._h = setTimeout(() => t.classList.remove('show'), timeout)
+}
+
+export function openModal() {
+  const m = q('#modal')
+  m.setAttribute('aria-hidden', 'false')
+}
+
+export function closeModal() {
+  const m = q('#modal')
+  m.setAttribute('aria-hidden', 'true')
+}
+
+function createVoteButton(type, label, count) {
+  const btn = el('button', { class: 'vote-btn', 'data-type': type })
+  btn.innerHTML = `${label} <span class="vote-count">${count||0}</span>`
+  return btn
+}
+
+function createKeoCard(keo) {
+  const card = el('div', { class: 'card', dataset: { id: keo.id } })
+  const title = el('h3', {}, keo.title)
+  const meta = el('div', { class: 'meta' }, `${formatDateTime(keo.datetime)} • ${keo.location || 'Chưa rõ'}`)
+  const votes = el('div', { class: 'votes' })
+  const bBtn = createVoteButton('bia', 'Bia 🍺', keo.votes?.bia)
+  const nBtn = createVoteButton('nuong', 'Nướng 🔥', keo.votes?.nuong)
+  const lBtn = createVoteButton('lau', 'Lẩu 🫕', keo.votes?.lau)
+  votes.append(bBtn, nBtn, lBtn)
+
+  const part = el('div', { class: 'participants' }, `Ai tham gia: ${keo.participants && keo.participants.length ? keo.participants.join(', ') : 'Chưa ai'}`)
+
+  const actions = el('div', { class: 'small-actions' })
+  const inputName = el('input', { class: 'input', placeholder: 'Thêm tên...' })
+  inputName.style.flex = '1'
+  const btnAddPart = el('button', { class: 'btn small' }, 'Thêm')
+  const btnIcs = el('button', { class: 'btn small' }, 'Thêm vào lịch')
+  const btnDelete = el('button', { class: 'btn light' }, 'Xoá')
+  actions.append(inputName, btnAddPart, btnIcs, btnDelete)
+
+  card.append(title, meta, votes, part, actions)
+
+  // listeners
+  votes.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.vote-btn')
+    if (!btn) return
+    const type = btn.dataset.type
+    // animate
+    btn.classList.add('pulse')
+    setTimeout(() => btn.classList.remove('pulse'), 300)
+    const name = prompt('Bạn tên gì? (để tính leaderboard)', '') || 'Ẩn danh'
+    import('./events.js').then(mod => {
+      mod.voteKeo(keo.id, type, name)
+      updateKeoInDom(keo.id)
+      showToast('Vote thành công!')
+    })
+  })
+
+  btnAddPart.addEventListener('click', () => {
+    const name = inputName.value.trim()
+    if (!name) { showToast('Nhập tên đã') ; return }
+    import('./events.js').then(mod => {
+      mod.addParticipant(keo.id, name)
+      updateKeoInDom(keo.id)
+      inputName.value = ''
+      showToast(`${name} đã được thêm vào danh sách`)
+    })
+  })
+
+  btnIcs.addEventListener('click', async () => {
+    const mod = await import('./events.js')
+    const url = mod.exportIcs(keo)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${keo.title.replace(/\s+/g,'_') || 'keo'}.ics`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    showToast('Đã thêm vào lịch!')
+  })
+
+  btnDelete.addEventListener('click', () => {
+    if (!confirm('Xác nhận xoá kèo này?')) return
+    import('./events.js').then(mod => {
+      mod.deleteKeo(keo.id)
+      removeKeoFromDom(keo.id)
+      showToast('Kèo đã được xoá')
+    })
+  })
+
+  return card
+}
+
+export function renderKeoList(filter = 'all', search = '') {
+  const data = loadData()
+  const list = data.keos || []
+  const wrap = keoListEl()
+  wrap.innerHTML = ''
+  const items = list.filter(k => {
+    const s = (k.title + ' ' + k.location).toLowerCase()
+    if (search && !s.includes(search.toLowerCase())) return false
+    if (filter === 'upcoming') return new Date(k.datetime) > new Date()
+    if (filter === 'past') return new Date(k.datetime) <= new Date()
+    return true
+  })
+  if (items.length === 0) {
+    const empty = el('div', { class: 'empty' })
+    empty.innerHTML = document.getElementById('empty-state').innerHTML
+    wrap.appendChild(empty)
+  } else {
+    items.forEach(k => wrap.appendChild(createKeoCard(k)))
+  }
+  updateDashboard()
+  updateLeaderboard()
+}
+
+export function addKeoToList(keo) {
+  const wrap = keoListEl()
+  const card = createKeoCard(keo)
+  // insert on top
+  if (wrap.firstChild) wrap.insertBefore(card, wrap.firstChild)
+  else wrap.appendChild(card)
+  updateDashboard()
+  updateLeaderboard()
+}
+
+export function updateKeoInDom(id) {
+  const data = loadData()
+  const keo = (data.keos||[]).find(k=>k.id===id)
+  if (!keo) return
+  const wrap = keoListEl()
+  const card = wrap.querySelector(`[data-id="${id}"]`)
+  if (!card) return
+  // update votes
+  const b = card.querySelector('[data-type="bia"] .vote-count')
+  const n = card.querySelector('[data-type="nuong"] .vote-count')
+  const l = card.querySelector('[data-type="lau"] .vote-count')
+  if (b) b.textContent = keo.votes?.bia || 0
+  if (n) n.textContent = keo.votes?.nuong || 0
+  if (l) l.textContent = keo.votes?.lau || 0
+  // update participants
+  const p = card.querySelector('.participants')
+  if (p) p.textContent = `Ai tham gia: ${keo.participants && keo.participants.length ? keo.participants.join(', ') : 'Chưa ai'}`
+  updateDashboard()
+  updateLeaderboard()
+}
+
+export function removeKeoFromDom(id) {
+  const wrap = keoListEl()
+  const card = wrap.querySelector(`[data-id="${id}"]`)
+  if (card) card.remove()
+  updateDashboard()
+  updateLeaderboard()
+}
+
+export function updateDashboard() {
+  const data = loadData()
+  const keos = data.keos || []
+  const totalKeo = keos.length
+  const totalVotes = keos.reduce((s,k)=> s + ((k.votes && (k.votes.bia||0) + (k.votes.nuong||0) + (k.votes.lau||0))||0),0)
+  q('#total-keo').textContent = totalKeo
+  q('#total-votes').textContent = totalVotes
+}
+
+export function updateLeaderboard() {
+  const s = Events.stats()
+  q('#leader-creator').textContent = s.leaderCreator
+  q('#leader-voter').textContent = s.leaderVoter
+}
