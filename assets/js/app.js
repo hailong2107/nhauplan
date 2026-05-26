@@ -82,11 +82,13 @@ function bind() {
   })
 
   // Handle download QR button
-  q('#btn-download-qr').addEventListener('click', () => {
+  q('#btn-download-qr').addEventListener('click', async () => {
     const canvas = q('#qr-canvas-modal')
-    if (downloadQRCode(canvas, 'nhau-invite')) {
-      showToast('QR code đã tải xuống!')
-    } else {
+    try {
+      const ok = await downloadQRCode(canvas, 'nhau-invite')
+      if (ok) showToast('QR code đã tải xuống!')
+      else showToast('Không thể tải QR code')
+    } catch (e) {
       showToast('Không thể tải QR code')
     }
   })

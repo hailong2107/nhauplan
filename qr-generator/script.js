@@ -395,8 +395,8 @@ function generateLinkForType(type, formData) {
 }
 
 function generateQR(link, size, fgColor, bgColor) {
-  DOM.qrCanvas.width = 0;
-  DOM.qrCanvas.height = 0;
+  // clear previous
+  if (DOM.qrCanvas) DOM.qrCanvas.innerHTML = '';
 
   try {
     state.qrInstance = new QRCode(DOM.qrCanvas, {
@@ -409,7 +409,7 @@ function generateQR(link, size, fgColor, bgColor) {
     });
     showToast('QR code generated successfully!');
   } catch (e) {
-    showError('Failed to generate QR code: ' + e.message);
+    showError('Failed to generate QR code: ' + (e && e.message ? e.message : e));
   }
 }
 
@@ -431,22 +431,54 @@ function downloadQR() {
   }
 
   try {
-    const tempCanvas = document.createElement('canvas');
-    const ctx = tempCanvas.getContext('2d');
-    const canvasSize = DOM.qrCanvas.width;
-    const padding = 20;
-    tempCanvas.width = canvasSize + padding * 2;
-    tempCanvas.height = canvasSize + padding * 2;
-    ctx.fillStyle = DOM.bgColor.value;
-    ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-    ctx.drawImage(DOM.qrCanvas, padding, padding);
-    const link = document.createElement('a');
-    link.href = tempCanvas.toDataURL('image/png');
-    link.download = `qr-code-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('QR code downloaded!');
+    // find inner img or canvas created by qrcode.js
+    const inner = DOM.qrCanvas.querySelector('img') || DOM.qrCanvas.querySelector('canvas');
+    if (!inner) {
+      showError('Không tìm thấy QR để tải xuống');
+      return;
+    }
+
+    if (inner.tagName.toLowerCase() === 'canvas') {
+      const url = inner.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `qr-code-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('QR code downloaded!');
+      return;
+    }
+
+    // img case
+    const imgSrc = inner.src;
+    if (!imgSrc) {
+      showError('QR image source unavailable');
+      return;
+    }
+    if (imgSrc.startsWith('data:')) {
+      const a = document.createElement('a');
+      a.href = imgSrc;
+      a.download = `qr-code-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('QR code downloaded!');
+      return;
+    }
+
+    // fetch remote src
+    fetch(imgSrc).then(r => r.blob()).then(blob => {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `qr-code-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      showToast('QR code downloaded!');
+    }).catch(() => showError('Failed to download QR code'));
   } catch (error) {
     showError('Failed to download QR code');
   }

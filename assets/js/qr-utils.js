@@ -37,7 +37,7 @@ export function generateInviteQR(inviteLink, container) {
  * @param {HTMLCanvasElement} canvas - Canvas with QR code
  * @param {string} fileName - Name for downloaded file
  */
-export function downloadQRCode(containerOrCanvas, fileName = 'invite-qr.png') {
+export async function downloadQRCode(containerOrCanvas, fileName = 'invite-qr.png') {
   if (!containerOrCanvas) {
     console.warn('QR element not found')
     return false
@@ -86,7 +86,7 @@ export function downloadQRCode(containerOrCanvas, fileName = 'invite-qr.png') {
   try {
     const url = img.src
     // If data URL, download directly
-    if (url.startsWith('data:')) {
+    if (url && url.startsWith('data:')) {
       const link = document.createElement('a')
       link.href = url
       link.download = `${fileName}-${Date.now()}.png`
@@ -97,25 +97,24 @@ export function downloadQRCode(containerOrCanvas, fileName = 'invite-qr.png') {
     }
 
     // Otherwise fetch the resource and download blob
-    return fetch(url)
-      .then(res => res.blob())
-      .then(blob => {
-        const blobUrl = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = blobUrl
-        link.download = `${fileName}-${Date.now()}.png`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(blobUrl)
-        return true
-      })
-      .catch(err => {
-        console.error('Failed to fetch QR image for download:', err)
-        return false
-      })
-  } catch (e) {
-    console.error('Failed to download QR image:', e)
+    if (url) {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = blobUrl
+      link.download = `${fileName}-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(blobUrl)
+      return true
+    }
+
+    console.warn('QR image URL unavailable')
+    return false
+  } catch (err) {
+    console.error('Failed to fetch QR image for download:', err)
     return false
   }
 }
