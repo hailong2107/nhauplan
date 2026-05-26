@@ -224,7 +224,7 @@ function handleCreateKeo() {
 
 async function hydrateCloudData() {
   const result = await loadCloudData()
-  if (result.data) {
+  if (result.source !== 'error') {
     const filter = q('#filter') ? q('#filter').value : 'all'
     const search = q('#search') ? q('#search').value.trim() : ''
     renderKeoList(filter, search, inviteToken)
@@ -236,18 +236,38 @@ async function hydrateCloudData() {
   }
 }
 
+function handleCloudflareDataUpdated() {
+  const filter = q('#filter') ? q('#filter').value : 'all'
+  const search = q('#search') ? q('#search').value.trim() : ''
+  renderKeoList(filter, search, inviteToken)
+  showToast('Dữ liệu đã được đồng bộ từ server')
+}
+
 function init() {
   // load theme
   const t = Storage.getTheme() || 'dark'
   applyTheme(t)
   bind()
-  // render cached local data quickly
   const filter = q('#filter') ? q('#filter').value : 'all'
   const search = q('#search') ? q('#search').value.trim() : ''
-  renderKeoList(filter, search, inviteToken)
+
+  window.addEventListener('cloudflare-data-updated', handleCloudflareDataUpdated)
+
+  const localData = Storage.loadData()
+  if (!localData.keos || localData.keos.length === 0) {
+    loadCloudData().then((result) => {
+      renderKeoList(filter, search, inviteToken)
+      if (result.source === 'server') {
+        showToast('Dữ liệu đã được đồng bộ từ server')
+      }
+    }).catch(() => {
+      renderKeoList(filter, search, inviteToken)
+    })
+  } else {
+    renderKeoList(filter, search, inviteToken)
+    hydrateCloudData()
+  }
   updateInviteNote(inviteToken)
-  // hydrate from Cloudflare worker in background
-  hydrateCloudData()
 }
 
 document.addEventListener('DOMContentLoaded', init)

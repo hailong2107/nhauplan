@@ -153,6 +153,14 @@ function updateCacheTimestamp(data, lastSyncedAt = now()) {
   return entry
 }
 
+function dispatchCloudflareUpdate(data) {
+  try {
+    window.dispatchEvent(new CustomEvent('cloudflare-data-updated', { detail: { data } }))
+  } catch (e) {
+    console.warn('[CloudflareAPI] Unable to dispatch update event', e)
+  }
+}
+
 async function fetchServerData() {
   try {
     const url = new URL(API_ENDPOINT)
@@ -250,7 +258,9 @@ async function backgroundRefresh() {
     const result = await fetchServerData()
     if (result.ok) {
       updateCacheTimestamp(result.data, now())
+      dispatchCloudflareUpdate(result.data)
     }
+    return result
   } finally {
     syncInProgress = false
   }
