@@ -58,6 +58,9 @@ function createKeoCard(keo) {
   votes.append(bBtn, nBtn, lBtn)
 
   const part = el('div', { class: 'participants' }, `Ai tham gia: ${keo.participants && keo.participants.length ? keo.participants.join(', ') : 'Chưa ai'}`)
+  
+  const deleteCodeNote = el('div', { class: 'delete-code-note', style: 'font-size: 0.85rem; color: #999; margin-top: 0.5rem;' })
+  deleteCodeNote.innerHTML = `<strong style="color: #666;">Mã xóa:</strong> <code style="background: #f0f0f0; padding: 0.2rem 0.4rem; border-radius: 3px;">${keo.deleteCode || 'N/A'}</code>`
 
   const actions = el('div', { class: 'small-actions' })
   const inputName = el('input', { class: 'input', placeholder: 'Thêm tên...' })
@@ -69,8 +72,8 @@ function createKeoCard(keo) {
   if (btnShare) actions.append(inputName, btnAddPart, btnIcs, btnShare, btnDelete)
   else actions.append(inputName, btnAddPart, btnIcs, btnDelete)
 
-  if (badge) card.append(title, badge, meta, votes, part, actions)
-  else card.append(title, meta, votes, part, actions)
+  if (badge) card.append(title, badge, meta, votes, part, deleteCodeNote, actions)
+  else card.append(title, meta, votes, part, deleteCodeNote, actions)
 
   // listeners
   votes.addEventListener('click', (ev) => {
@@ -132,11 +135,16 @@ function createKeoCard(keo) {
   }
 
   btnDelete.addEventListener('click', () => {
-    if (!confirm('Xác nhận xoá kèo này?')) return
+    const code = prompt(`Nhập mã xóa kèo (gợi ý: ${keo.deleteCode}):`, '')
+    if (code === null || code === '') return
     import('./events.js').then(mod => {
-      mod.deleteKeo(keo.id)
-      removeKeoFromDom(keo.id)
-      showToast('Kèo đã được xoá')
+      const ok = mod.deleteKeo(keo.id, code)
+      if (ok) {
+        removeKeoFromDom(keo.id)
+        showToast('Kèo đã được xoá')
+      } else {
+        showToast('❌ Mã xóa không chính xác!')
+      }
     })
   })
 

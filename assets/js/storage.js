@@ -1,5 +1,6 @@
 const DATA_KEY = 'nhauplanner:data:v1'
 const THEME_KEY = 'nhauplanner:theme:v1'
+const ADMIN_KEY_STORAGE = 'nhauplanner:admin:v1'
 
 export function loadData() {
   try {
@@ -23,4 +24,29 @@ export function getTheme() {
 
 export function setTheme(theme) {
   localStorage.setItem(THEME_KEY, theme)
+}
+
+export function setAdminKey(key) {
+  if (key && typeof key === 'string' && key.trim().length > 0) {
+    localStorage.setItem(ADMIN_KEY_STORAGE, key.trim())
+    return true
+  }
+  return false
+}
+
+export function getAdminKey() {
+  return localStorage.getItem(ADMIN_KEY_STORAGE) || ''
+}
+
+export function verifyAdminKey(key) {
+  const stored = getAdminKey()
+  return stored && key === stored
+}
+
+export function clearAdminKey() {
+  localStorage.removeItem(ADMIN_KEY_STORAGE)
+}
+
+export function isAdminMode() {
+  return !!getAdminKey()
 }

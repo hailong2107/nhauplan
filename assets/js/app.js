@@ -59,6 +59,14 @@ function bind() {
     }
   })
 
+  // Admin panel: Ctrl+Shift+A
+  document.addEventListener('keydown', (ev) => {
+    if (ev.ctrlKey && ev.shiftKey && ev.key === 'A') {
+      ev.preventDefault()
+      showAdminPanel()
+    }
+  })
+
   // Handle invite-only checkbox and QR generation
   q('#input-invite-only').addEventListener('change', (ev) => {
     handleInviteOnlyChange(ev.target.checked)
@@ -241,6 +249,39 @@ function handleCloudflareDataUpdated() {
   const search = q('#search') ? q('#search').value.trim() : ''
   renderKeoList(filter, search, inviteToken)
   showToast('Dữ liệu đã được đồng bộ từ server')
+}
+
+function showAdminPanel() {
+  const isAdmin = Storage.isAdminMode()
+  
+  if (!isAdmin) {
+    const key = prompt('Nhập mã admin:')
+    if (!key) return
+    if (Storage.verifyAdminKey(key)) {
+      Storage.setAdminKey(key)
+      showToast('✓ Đã kích hoạt chế độ admin')
+    } else {
+      showToast('❌ Mã admin sai')
+    }
+    return
+  }
+
+  const action = prompt('Admin Panel:\n[1] Xóa tất cả kèo\n[2] Tắt chế độ admin\n[0] Hủy\n\nNhập [1], [2], hoặc [0]:')
+  if (!action) return
+
+  if (action === '1') {
+    if (!confirm('⚠️  Xóa tất cả kèo? Hành động này không thể hoàn tác!')) return
+    const result = Events.deleteAllKeos(Storage.getAdminKey())
+    if (result.ok) {
+      renderKeoList('all', '', inviteToken)
+      showToast(`✓ Đã xóa ${result.deletedCount} kèo`)
+    } else {
+      showToast('❌ ' + result.error)
+    }
+  } else if (action === '2') {
+    Storage.clearAdminKey()
+    showToast('Đã tắt chế độ admin')
+  }
 }
 
 function init() {

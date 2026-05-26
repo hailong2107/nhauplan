@@ -1,4 +1,4 @@
-import { loadData as loadLocalData, saveData as saveLocalData, generateId } from './storage.js'
+import { loadData as loadLocalData, saveData as saveLocalData, generateId, verifyAdminKey, isAdminMode } from './storage.js'
 import { saveData as saveCloudData } from './cloudflare-api.js'
 
 export const SUGGESTIONS = [
@@ -17,6 +17,15 @@ function persist(data) {
   })
 }
 
+function generateDeleteCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let code = ''
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return code
+}
+
 export function createKeo({ title, datetime, location, creator, participants = [], inviteOnly = false, inviteCode = '' }) {
   const data = loadLocalData()
   const keo = {
@@ -30,6 +39,7 @@ export function createKeo({ title, datetime, location, creator, participants = [
     voters: [],
     inviteOnly: Boolean(inviteOnly),
     inviteCode: inviteOnly ? (inviteCode || generateId('inv_')) : '',
+    deleteCode: generateDeleteCode(),
     createdAt: new Date().toISOString()
   }
   data.keos = data.keos || []
@@ -38,10 +48,35 @@ export function createKeo({ title, datetime, location, creator, participants = [
   return keo
 }
 
-export function deleteKeo(id) {
+export function deleteKeo(id, deleteCode = '') {
   const data = loadLocalData()
+  const keo = (data.keos || []).find(k => k.id === id)
+  if (!keo) return false
+  if (keo.deleteCode !== deleteCode) return false
   data.keos = (data.keos || []).filter(k => k.id !== id)
   persist(data)
+  return true
+}
+
+export function deleteKeoAdmin(adminKey, id = null) {
+  if (!verifyAdminKey(adminKey)) return { ok: false, error: 'Admin key không chính xác' }
+  const data = loadLocalData()
+  if (id) {
+    data.keos = (data.keos || []).filter(k => k.id !== id)
+  } else {
+    data.keos = []
+  }
+  persist(data)
+  return { ok: true, deleted: id ? 1 : (data.keos ? 0 : 0) }
+}
+
+export function deleteAllKeos(adminKey) {
+  if (!verifyAdminKey(adminKey)) return { ok: false, error: 'Admin key không chính xác' }
+  const data = loadLocalData()
+  const count = (data.keos || []).length
+  data.keos = []
+  persist(data)
+  return { ok: true, deletedCount: count }
 }
 
 export function voteKeo(id, type = 'bia', voter = 'Ẩn danh') {
