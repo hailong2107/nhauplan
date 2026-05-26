@@ -11,7 +11,7 @@ export const SUGGESTIONS = [
 
 function persist(data) { saveData(data) }
 
-export function createKeo({ title, datetime, location, creator, participants = [], inviteOnly = false }) {
+export function createKeo({ title, datetime, location, creator, participants = [], inviteOnly = false, inviteCode = '' }) {
   const data = loadData()
   const keo = {
     id: generateId('k_'),
@@ -23,7 +23,7 @@ export function createKeo({ title, datetime, location, creator, participants = [
     votes: { bia: 0, nuong: 0, lau: 0 },
     voters: [],
     inviteOnly: Boolean(inviteOnly),
-    inviteCode: inviteOnly ? generateId('inv_') : '',
+    inviteCode: inviteOnly ? (inviteCode || generateId('inv_')) : '',
     createdAt: new Date().toISOString()
   }
   data.keos = data.keos || []
@@ -100,7 +100,7 @@ export function stats() {
   const creatorsCount = {}
   const votersCount = {}
   keos.forEach(k => {
-    creatorsCount[k.creator] = (creatorsCount[k.creator] || 0) + 1
+    creatorsCount[k.creator] = (creatorsCount[k.creator] || 0) + 1;
     (k.voters || []).forEach(v => { votersCount[v.name] = (votersCount[v.name]||0)+1 })
   })
   const leaderCreator = Object.entries(creatorsCount).sort((a,b)=>b[1]-a[1])[0]

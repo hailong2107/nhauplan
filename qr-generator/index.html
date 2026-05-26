@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="QR Code Generator - Create shareable QR codes for Telegram, Zalo, and custom URLs">
+    <meta name="theme-color" content="#6366f1">
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">QR Code Generator</h1>
+            <p class="subtitle">Create and share QR codes easily</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Input Form -->
+            <section class="form-section">
+                <form id="qr-form" class="form">
+                    <!-- Type Selection -->
+                    <div class="form-group">
+                        <label for="qr-type" class="label">Loại QR Code</label>
+                        <select id="qr-type" class="input" required>
+                            <option value="url">🔗 URL / Link</option>
+                            <option value="text">📝 Text</option>
+                            <option value="email">📧 Email</option>
+                            <option value="sms">💬 SMS / Tin nhắn</option>
+                            <option value="call">☎️ Gọi điện</option>
+                            <option value="wifi">📶 WiFi</option>
+                            <option value="vcard">👤 vCard (Thẻ liên hệ)</option>
+                            <option value="event">📅 Calendar Event</option>
+                            <option value="telegram">✈️ Telegram</option>
+                            <option value="zalo">💬 Zalo</option>
+                        </select>
+                    </div>
+
+                    <!-- Dynamic Fields Container -->
+                    <div id="dynamic-fields"></div>
+
+                    <!-- Platform Selection (deprecated - now in QR Type) -->
+                    <div class="form-group hidden" id="platform-group">
+                        <label for="platform" class="label">Platform</label>
+                        <select id="platform" class="input" required>
+                            <option value="direct">Direct Link</option>
+                            <option value="telegram">Telegram</option>
+                            <option value="zalo">Zalo</option>
+                        </select>
+                    </div>
+
+                    <!-- Size Selection -->
+                    <div class="form-group">
+                        <label for="size" class="label">QR Code Size</label>
+                        <select id="size" class="input">
+                            <option value="small">Small (150px)</option>
+                            <option value="medium" selected>Medium (250px)</option>
+                            <option value="large">Large (400px)</option>
+                        </select>
+                    </div>
+
+                    <!-- Color Customization -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fg-color" class="label">Foreground</label>
+                            <input 
+                                type="color" 
+                                id="fg-color" 
+                                class="input color-input" 
+                                value="#000000"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="bg-color" class="label">Background</label>
+                            <input 
+                                type="color" 
+                                id="bg-color" 
+                                class="input color-input" 
+                                value="#ffffff"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="error-message" class="error-message hidden"></div>
+
+                    <!-- Generate Button -->
+                    <button type="submit" class="btn btn-primary">
+                        Generate QR Code
+                    </button>
+                </form>
+            </section>
+
+            <!-- Preview Section -->
+            <section class="preview-section">
+                <!-- Generated Link Preview -->
+                <div class="preview-card hidden" id="preview-container">
+                    <h2 class="preview-title">Generated Link</h2>
+                    <div class="link-preview" id="link-preview"></div>
+                    <div class="preview-actions">
+                        <button id="copy-link-btn" class="btn btn-secondary">Copy Link</button>
+                        <span id="copy-feedback" class="feedback-text hidden">Copied!</span>
+                    </div>
+                </div>
+
+                <!-- QR Code Display -->
+                <div class="preview-card hidden" id="qr-container">
+                    <h2 class="preview-title">QR Code</h2>
+                    <div class="qr-wrapper">
+                        <canvas id="qr-canvas" class="qr-canvas"></canvas>
+                    </div>
+                    
+                    <!-- Platform Info -->
+                    <div class="platform-info hidden" id="mobile-info">
+                        <p class="info-text">📱 On mobile? Tap "Open in App" to share directly:</p>
+                        <button id="open-in-app-btn" class="btn btn-primary btn-small">Open in App</button>
+                    </div>
+
+                    <!-- Desktop Info -->
+                    <div class="platform-info hidden" id="desktop-info">
+                        <p class="info-text">💻 Scan this QR code on your mobile device</p>
+                    </div>
+
+                    <div class="preview-actions">
+                        <button id="download-qr-btn" class="btn btn-secondary">Download QR Code</button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">🔗</div>
+                    <p class="empty-text">Fill in the form and generate a QR code</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- QR Code Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
