@@ -1,6 +1,7 @@
 import { renderKeoList, openModal, closeModal, addKeoToList, showToast, updateInviteNote } from './ui.js'
 import * as Events from './events.js'
 import * as Storage from './storage.js'
+import { loadData as loadCloudData } from './cloudflare-api.js'
 import { q, debounce } from './utils.js'
 import { generateInviteQR, downloadQRCode, copyToClipboard } from './qr-utils.js'
 const inviteToken = new URLSearchParams(window.location.search).get('invite') || ''
@@ -221,16 +222,32 @@ function handleCreateKeo() {
   }
 }
 
+async function hydrateCloudData() {
+  const result = await loadCloudData()
+  if (result.data) {
+    const filter = q('#filter') ? q('#filter').value : 'all'
+    const search = q('#search') ? q('#search').value.trim() : ''
+    renderKeoList(filter, search, inviteToken)
+    if (result.source === 'server') {
+      showToast('Dữ liệu đã được đồng bộ từ server')
+    }
+  } else {
+    console.warn('[app] Cloudflare load failed:', result.error)
+  }
+}
+
 function init() {
   // load theme
   const t = Storage.getTheme() || 'dark'
   applyTheme(t)
   bind()
-  // initial render using current controls and invite token
+  // render cached local data quickly
   const filter = q('#filter') ? q('#filter').value : 'all'
   const search = q('#search') ? q('#search').value.trim() : ''
   renderKeoList(filter, search, inviteToken)
   updateInviteNote(inviteToken)
+  // hydrate from Cloudflare worker in background
+  hydrateCloudData()
 }
 
 document.addEventListener('DOMContentLoaded', init)

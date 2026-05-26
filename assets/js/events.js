@@ -1,4 +1,5 @@
-import { loadData, saveData, generateId } from './storage.js'
+import { loadData as loadLocalData, saveData as saveLocalData, generateId } from './storage.js'
+import { saveData as saveCloudData } from './cloudflare-api.js'
 
 export const SUGGESTIONS = [
   'Kèo chill cuối tuần',
@@ -9,10 +10,15 @@ export const SUGGESTIONS = [
   'Uống nhẹ, cười tẹt ga',
 ]
 
-function persist(data) { saveData(data) }
+function persist(data) {
+  saveLocalData(data)
+  saveCloudData(data).catch((err) => {
+    console.warn('[events] Cloudflare save failed', err)
+  })
+}
 
 export function createKeo({ title, datetime, location, creator, participants = [], inviteOnly = false, inviteCode = '' }) {
-  const data = loadData()
+  const data = loadLocalData()
   const keo = {
     id: generateId('k_'),
     title: title.trim(),
@@ -33,13 +39,13 @@ export function createKeo({ title, datetime, location, creator, participants = [
 }
 
 export function deleteKeo(id) {
-  const data = loadData()
+  const data = loadLocalData()
   data.keos = (data.keos || []).filter(k => k.id !== id)
   persist(data)
 }
 
 export function voteKeo(id, type = 'bia', voter = 'Ẩn danh') {
-  const data = loadData()
+  const data = loadLocalData()
   const keo = (data.keos || []).find(k => k.id === id)
   if (!keo) return null
   if (!keo.votes) keo.votes = { bia:0, nuong:0, lau:0 }
@@ -51,7 +57,7 @@ export function voteKeo(id, type = 'bia', voter = 'Ẩn danh') {
 }
 
 export function addParticipant(id, name) {
-  const data = loadData()
+  const data = loadLocalData()
   const keo = (data.keos || []).find(k => k.id === id)
   if (!keo) return null
   const clean = (name || '').trim()
@@ -92,7 +98,7 @@ export function suggestKeo() {
 }
 
 export function stats() {
-  const data = loadData()
+  const data = loadLocalData()
   const keos = data.keos || []
   const totalKeo = keos.length
   const totalVotes = keos.reduce((s,k) => s + ((k.votes && (k.votes.bia||0) + (k.votes.nuong||0) + (k.votes.lau||0))||0), 0)

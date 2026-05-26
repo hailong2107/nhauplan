@@ -1,100 +1,97 @@
-Nhậu Planner
+# Nhậu Planner
 
-Mini web app cho việc "lên kèo" — 100% giao diện tiếng Việt, không cần backend. Dự án tĩnh, phù hợp deploy trên GitHub Pages.
+Nhậu Planner là một web app tĩnh cho việc "lên kèo" nhóm bằng giao diện tiếng Việt. Dự án chạy hoàn toàn trên trình duyệt, phù hợp deploy lên GitHub Pages hoặc bất kỳ static host nào.
 
-Tính năng chính
-- Tạo kèo: tiêu đề, thời gian, địa điểm, người tạo, danh sách tham gia
-- Gợi ý kèo tự động
-- Vote kiểu: Bia 🍺 / Nướng 🔥 / Lẩu 🫕 (cập nhật điểm ngay lập tức)
-- Thêm người tham gia
-- Xuất file `.ics` (Thêm vào lịch)
-- Tìm kiếm & lọc (sắp diễn ra / đã qua)
-- Dark/Light mode (lưu vào `localStorage`)
-- Dashboard: tổng kèo, tổng lượt vote
-- Toàn bộ UI bằng tiếng Việt, có toast và modal
-- **QR Code Generator**: Tạo QR code cho link invite kèo + tool riêng với nhiều loại QR
+## Tính năng chính
+- Tạo kèo nhanh: tiêu đề, thời gian, địa điểm, người tạo, mô tả, danh sách tham gia
+- Invite-only: kèo chỉ ai có link mời mới xem được
+- Vote trực tiếp: Bia 🍺 / Nướng 🔥 / Lẩu 🫕
+- Thêm/xóa người tham gia
+- Xuất file `.ics` để thêm vào lịch
+- Tìm kiếm và lọc kèo theo trạng thái
+- Dark/Light mode với lưu trạng thái vào `localStorage`
+- Dashboard hiển thị tổng số kèo và tổng lượt vote
+- Toast thông báo, modal, form tiện dụng
+- Lưu dữ liệu local-first, đồng bộ nền với Cloudflare Worker khi cấu hình API
 
-QR Code Generator
-- **Tích hợp trong app**: Khi tạo kèo invite-only, tự động generate QR code cho link mời, copy link và download QR ngay trong modal tạo kèo
-- **Trang riêng** (`/qr-generator/`): Tool toàn chức năng mở rộng tương tự maclife.vn/qr-codes
-  - Text QR
-  - URL / Link QR
-  - Email QR (`mailto:`)
-  - SMS / Tin nhắn QR
-  - Call QR (`tel:`)
-  - WiFi QR (SSID, mật khẩu, mã bảo mật, hidden)
-  - vCard (thẻ liên hệ)
-  - Calendar Event / sự kiện
-  - Telegram / Zalo Share Links
-- **Tùy chỉnh**: Kích thước, màu nền, màu mã, download PNG
-- **Mobile-friendly**: Detect mobile, hiển thị nút "Mở trong app" khi phù hợp
-- **Lưu tự động**: localStorage lưu input gần nhất để reload tiện lợi
+## QR Code và invite
+### Trong app
+- Mỗi invite-only kèo tự động generate QR code cho link mời
+- Hiển thị QR trong modal kèo
+- Có thể copy link invite & download QR trực tiếp
 
-### Mở rộng chức năng QR
-- `qr-generator/index.html` là trang QR tool riêng, đã được nâng cấp để hỗ trợ nhiều loại QR
-- Các trường input tự động thay đổi theo loại QR bạn chọn
-- Kết quả hiển thị preview đường dẫn và QR trong cùng một trang
-- Hỗ trợ tải QR dưới dạng PNG
-- Giao diện responsive, dễ dùng trên điện thoại và desktop
+### Trang QR generator riêng
+Phiên bản riêng tại `qr-generator/` hỗ trợ nhiều loại QR code:
+- URL / link
+- Văn bản (Text)
+- Email (`mailto:`)
+- SMS / tin nhắn (`smsto:`)
+- Gọi điện (`tel:`)
+- WiFi
+- vCard (liên hệ)
+- Sự kiện Lịch (`VCALENDAR`)
+- Telegram / Zalo share
 
-### Ví dụ nội dung QR
-- `https://example.com` → URL
-- `Hello world` → Text
-- `mailto:email@example.com?subject=Hello&body=Hi` → Email
-- `smsto:+84912345678?body=Xin chào` → SMS
-- `tel:+84912345678` → Call
-- `WIFI:T:WPA;S:SSID;P:password;H:false;;` → WiFi
-- `BEGIN:VCARD...END:VCARD` → vCard
-- `BEGIN:VCALENDAR...END:VEVENT...END:VCALENDAR` → Event
+### Tùy chỉnh QR
+- Thiết lập kích thước QR
+- Chọn màu mã, màu nền
+- Xem preview trực tiếp
+- Tải QR dưới dạng PNG
+- Giao diện responsive, chạy tốt trên mobile
 
+## Đồng bộ với Cloudflare Worker
+Ứng dụng có module `assets/js/cloudflare-api.js` để đồng bộ dữ liệu với Cloudflare Worker API.
 
-Cấu trúc dự án
-- `index.html` — trang chính (HTML, meta SEO, ARIA)
+- GET/POST dữ liệu từ Cloudflare Worker
+- Gửi API key qua `x-api-key` header và `api_key` query param
+- Retry, timeout và cache response để tối ưu trải nghiệm
+- Dữ liệu local-first, đồng bộ nền khi có kết nối
+
+> Lưu ý: cần cấu hình `API_ENDPOINT` và `API_KEY` trong `assets/js/cloudflare-api.js` nếu muốn dùng sync với server.
+
+## Cấu trúc dự án
+- `index.html` — trang chính của ứng dụng
+- `qr-generator/index.html` — trang QR generator độc lập
 - `assets/css/styles.css` — stylesheet chính
-- `assets/js/app.js` — khởi tạo app, binding global
-- `assets/js/ui.js` — rendering DOM, toast, modal
-- `assets/js/events.js` — thao tác dữ liệu (create/vote/delete/export)
+- `assets/js/app.js` — khởi tạo app, binding sự kiện
+- `assets/js/ui.js` — render DOM, modal, toast
+- `assets/js/events.js` — xử lý tạo/vote/xóa kèo
 - `assets/js/storage.js` — wrapper `localStorage`
-- `assets/js/utils.js` — helper DOM & utils
+- `assets/js/cloudflare-api.js` — client sync với Cloudflare Worker
+- `assets/js/utils.js` — helper chung
 
-Chạy nhanh (local)
-Cách đơn giản nhất là mở `index.html` bằng một static server (tránh `file://` do module/import):
+## Chạy thử local
+Tốt nhất dùng static server thay vì mở trực tiếp file `index.html`.
 
-- Dùng Python 3 (trong thư mục project):
-
+### Dùng Python 3
 ```bash
+cd /Users/hailongnguyen/projects/nhauplan
 python3 -m http.server 8000
-# Mở http://localhost:8000
 ```
+Mở `http://localhost:8000`
 
-- Hoặc dùng `serve` (yarn / npm):
-
+### Dùng `serve`
 ```bash
 npm install -g serve
 serve -s . -l 8000
 ```
 
-- Hoặc mở bằng extension `Live Server` trong VS Code.
+### Hoặc dùng Live Server trong VS Code
 
-Deploy lên GitHub Pages
-1. Push mã nguồn lên GitHub (branch `main` hoặc `gh-pages`).
-2. Cách nhanh (không cần build): vào trang repo → Settings → Pages → Source: `main` branch / root (`/`) → Save. Chờ vài phút, site sẽ có dạng `https://<username>.github.io/<repo>/`.
+## Deploy lên GitHub Pages
+1. Push mã nguồn lên GitHub
+2. Vào repo → Settings → Pages
+3. Chọn `Source: main branch` và `root` (`/`)
+4. Lưu và chờ vài phút
 
-Tự động deploy bằng GitHub Action
-- Nếu repo dùng branch `main`, action sẽ tự động chạy mỗi khi push lên `main`.
-- Action sẽ upload toàn bộ thư mục gốc lên Pages mà không cần bước build riêng.
+> Nếu muốn deploy tự động với `gh-pages`, cài `gh-pages` và cấu hình script trong `package.json`.
 
-Nếu bạn muốn dùng `gh-pages` branch tự động:
+## Invite-only flow
+- Chọn checkbox invite-only khi tạo kèo
+- Link mời được tạo ra và có thể copy hoặc chia sẻ
+- Người khác mở link sẽ thấy kèo theo chế độ invite-only
 
-```bash
-npm init -y
-npm install --save-dev gh-pages
-# thêm script vào package.json
-# "predeploy": "", "deploy": "gh-pages -d ."
-npm run deploy
-```
-
-Invite link
-- Khi tạo kèo, đánh dấu checkbox "Chỉ những ai có link invite mới xem kèo này".
-- Sau khi tạo kèo, nếu kèo là invite-only, sẽ có nút "Sao chép link mời" trên thẻ kèo.
-- Người nhận link sẽ mở trang với tham số URL `?invite=...` để xem chế độ mời.
+## Ghi chú
+- Ứng dụng hoạt động tốt trên trình duyệt hiện đại
+- Tập trung vào trải nghiệm người dùng tiếng Việt
+- Có thể mở rộng thêm sync server, chia sẻ kèo, hoặc multi-user sau này
