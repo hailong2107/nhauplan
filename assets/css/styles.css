@@ -40,6 +40,14 @@ body{margin:0;background:linear-gradient(180deg,#071018 0%, #081219 100%);font-f
 .list-section{margin-top:8px}
 .list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .keo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.chat-section{margin-top:22px}
+.chat-list{height:240px;overflow:auto;background:var(--panel);border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:12px}
+.chat-message{padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04)}
+.chat-message:last-child{border-bottom:0}
+.chat-text{font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.chat-time,.chat-empty{display:block;margin-top:4px;font-size:12px;color:var(--muted)}
+.chat-form{display:flex;gap:8px;margin-top:10px}
+.chat-form .input{flex:1}
 .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:var(--card-pad);border-radius:12px;border:1px solid rgba(255,255,255,0.03);position:relative}
 .card h3{margin:0 0 8px;font-size:16px}
 .meta{font-size:13px;color:var(--muted);margin-bottom:8px}

@@ -1,5 +1,6 @@
 import { loadData as loadLocalData, saveData as saveLocalData, generateId, verifyAdminKey, isAdminMode } from './storage.js'
 import { saveData as saveCloudData } from './cloudflare-api.js'
+import { sendChatMessage as postChatMessage } from './chat.js'
 
 export const SUGGESTIONS = [
   'Kèo chill cuối tuần',
@@ -130,6 +131,10 @@ export function exportIcs(keo) {
 export function suggestKeo() {
   const i = Math.floor(Math.random() * SUGGESTIONS.length)
   return SUGGESTIONS[i]
+}
+
+export async function sendChatMessage(text) {
+  return postChatMessage(text)
 }
 
 export function stats() {

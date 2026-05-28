@@ -1,7 +1,9 @@
-import { renderKeoList, openModal, closeModal, addKeoToList, showToast, updateInviteNote } from './ui.js'
+import { renderKeoList, openModal, closeModal, addKeoToList, showToast, updateInviteNote, renderChat } from './ui.js'
 import * as Events from './events.js'
 import * as Storage from './storage.js'
 import { loadData as loadCloudData } from './cloudflare-api.js'
+import { startChatPolling, listChatMessages } from './chat.js'
+import { initSeo } from './seo.js'
 import { q, debounce } from './utils.js'
 import { generateInviteQR, downloadQRCode, copyToClipboard } from './qr-utils.js'
 const inviteToken = new URLSearchParams(window.location.search).get('invite') || ''
@@ -43,6 +45,21 @@ function bind() {
   q('#filter').addEventListener('change', doRender)
   q('#clear-search').addEventListener('click', () => { q('#search').value=''; doRender() })
   q('#search').addEventListener('input', debounce(doRender, 180))
+
+  q('#form-chat').addEventListener('submit', async (ev) => {
+    ev.preventDefault()
+    const input = q('#chat-input')
+    const text = input.value.trim()
+    if (!text) return
+    try {
+      await Events.sendChatMessage(text)
+      input.value = ''
+      renderChat(await listChatMessages())
+    } catch (e) {
+      console.error('Gửi chat lỗi', e)
+      showToast('Không thể gửi tin nhắn')
+    }
+  })
 
   q('#toggle-theme').addEventListener('click', () => {
     const current = document.getElementById('app').classList.contains('light-mode') ? 'light' : 'dark'
@@ -285,6 +302,7 @@ function showAdminPanel() {
 }
 
 function init() {
+  initSeo(inviteToken)
   // load theme
   const t = Storage.getTheme() || 'dark'
   applyTheme(t)
@@ -309,6 +327,7 @@ function init() {
     hydrateCloudData()
   }
   updateInviteNote(inviteToken)
+  startChatPolling(renderChat)
 }
 
 document.addEventListener('DOMContentLoaded', init)

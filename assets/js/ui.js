@@ -230,3 +230,23 @@ export function updateLeaderboard() {
   q('#leader-creator').textContent = s.leaderCreator
   q('#leader-voter').textContent = s.leaderVoter
 }
+
+export function renderChat(messages = []) {
+  const list = q('#chat-list')
+  if (!list) return
+  list.innerHTML = ''
+
+  if (!messages.length) {
+    list.append(el('div', { class: 'chat-empty' }, 'Chưa có tin nhắn.'))
+    return
+  }
+
+  messages.forEach((message) => {
+    const item = el('div', { class: 'chat-message', dataset: { id: message.id } })
+    const text = el('div', { class: 'chat-text' }, message.text)
+    const time = el('time', { class: 'chat-time', datetime: message.timestamp }, formatDateTime(message.timestamp))
+    item.append(text, time)
+    list.append(item)
+  })
+  list.scrollTop = list.scrollHeight
+}

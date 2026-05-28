@@ -6,12 +6,18 @@
     <title>Nhậu Planner — Lên kèo cùng anh em</title>
     <meta name="description" content="Nhậu Planner — tạo kèo, mời bạn bè, vote kiểu nhậu và thêm vào lịch. 100% tĩnh, chạy trên GitHub Pages." />
     <meta name="author" content="Nhậu Planner" />
+    <meta name="robots" content="index,follow" />
     <meta name="theme-color" content="#0c0d10" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Nhậu Planner — Lên kèo cùng anh em" />
-    <meta property="og:description" content="Tạo kèo nhanh, mời anh em, vote Bia/Nướng/Lẩu và thêm vào lịch. Không cần backend." />
+    <meta property="og:description" content="Tạo kèo nhanh, mời anh em, vote Bia/Nướng/Lẩu, chat nhẹ và thêm vào lịch." />
+    <meta property="og:url" content="https://nhauplan.com/" />
     <meta property="og:image" content="/assets/og-image.png" />
-    <link rel="canonical" href="https://your-username.github.io/nhauplan/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Nhậu Planner — Lên kèo cùng anh em" />
+    <meta name="twitter:description" content="Tạo kèo nhanh, mời anh em, vote Bia/Nướng/Lẩu, chat nhẹ và thêm vào lịch." />
+    <meta name="twitter:image" content="/assets/og-image.png" />
+    <link rel="canonical" href="https://nhauplan.com/" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.88em' font-size='78'%3E%F0%9F%8D%BA%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="assets/css/styles.css">
   </head>
@@ -76,6 +82,17 @@
               <p class="micro">Nhấn "Tạo kèo nhậu" để bắt đầu.</p>
             </div>
           </div>
+        </section>
+
+        <section class="chat-section" aria-label="Chat kèo">
+          <div class="list-header">
+            <h2>Chat</h2>
+          </div>
+          <div id="chat-list" class="chat-list" aria-live="polite"></div>
+          <form id="form-chat" class="chat-form">
+            <input id="chat-input" class="input" maxlength="500" placeholder="Nhắn anh em..." aria-label="Tin nhắn chat" />
+            <button class="btn primary" type="submit">Gửi</button>
+          </form>
         </section>
       </main>
 
@@ -152,4 +169,3 @@
     <script type="module" src="assets/js/app.js" defer></script>
   </body>
 </html>
-
