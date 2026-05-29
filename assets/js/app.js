@@ -52,9 +52,10 @@ function bind() {
     const text = input.value.trim()
     if (!text) return
     try {
-      await Events.sendChatMessage(text)
+      const sentMessage = await Events.sendChatMessage(text)
       input.value = ''
-      renderChat(await listChatMessages())
+      const messages = await listChatMessages()
+      renderChat(Array.isArray(messages) && messages.length ? messages : (sentMessage ? [sentMessage] : []))
     } catch (e) {
       console.error('Gửi chat lỗi', e)
       showToast('Không thể gửi tin nhắn')

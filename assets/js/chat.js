@@ -28,7 +28,7 @@ export async function sendChatMessage(text) {
     cache: 'no-store',
     body: JSON.stringify({ text: clean }),
   }).then(readJson)
-  return json.message
+  return json.message || { id: `local-${Date.now()}`, text: clean, timestamp: new Date().toISOString() }
 }
 
 export function startChatPolling(onMessages, interval = POLL_MS) {
