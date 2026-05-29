@@ -16,7 +16,13 @@ export async function listChatMessages() {
     headers: { Accept: 'application/json' },
     cache: 'no-store',
   }).then(readJson)
-  return Array.isArray(json.messages) ? json.messages : (Array.isArray(json?.data) ? json.data : [])
+  if (Array.isArray(json.messages)) return json.messages
+  if (Array.isArray(json?.data)) return json.data
+  if (Array.isArray(json)) return json
+  if (json && typeof json === 'object' && 'text' in json) {
+    return [{ id: json.id || `remote-${Date.now()}`, text: json.text, timestamp: json.timestamp || new Date().toISOString() }]
+  }
+  return []
 }
 
 export async function sendChatMessage(text) {

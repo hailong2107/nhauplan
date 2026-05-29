@@ -236,12 +236,16 @@ export function renderChat(messages = []) {
   if (!list) return
   list.innerHTML = ''
 
-  if (!messages.length) {
+  const items = Array.isArray(messages)
+    ? messages
+    : (messages && typeof messages === 'object' && 'text' in messages ? [messages] : [])
+
+  if (!items.length) {
     list.append(el('div', { class: 'chat-empty' }, 'Chưa có tin nhắn.'))
     return
   }
 
-  messages.forEach((message) => {
+  items.forEach((message) => {
     const item = el('div', { class: 'chat-message', dataset: { id: message.id } })
     const text = el('div', { class: 'chat-text' }, message.text)
     const time = el('time', { class: 'chat-time', datetime: message.timestamp }, formatDateTime(message.timestamp))
