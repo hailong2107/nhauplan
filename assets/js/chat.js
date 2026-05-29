@@ -14,8 +14,9 @@ async function readJson(response) {
 export async function listChatMessages() {
   const json = await fetch(apiUrl('/chat/list'), {
     headers: { Accept: 'application/json' },
+    cache: 'no-store',
   }).then(readJson)
-  return Array.isArray(json.messages) ? json.messages : []
+  return Array.isArray(json.messages) ? json.messages : (Array.isArray(json?.data) ? json.data : [])
 }
 
 export async function sendChatMessage(text) {
@@ -24,6 +25,7 @@ export async function sendChatMessage(text) {
   const json = await fetch(apiUrl('/chat/send'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    cache: 'no-store',
     body: JSON.stringify({ text: clean }),
   }).then(readJson)
   return json.message
